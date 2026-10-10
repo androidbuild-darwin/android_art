@@ -68,6 +68,13 @@
 
 namespace art {
 
+#if defined(__APPLE__)
+// Darwin uses 64-bit offsets for lseek and does not provide lseek64.
+static off_t lseek64(int fd, off_t offset, int whence) {
+  return lseek(fd, offset, whence);
+}
+#endif
+
 const uint8_t ProfileCompilationInfo::kProfileMagic[] = { 'p', 'r', 'o', '\0' };
 // Last profile version: New extensible profile format.
 const uint8_t ProfileCompilationInfo::kProfileVersion[] = { '0', '1', '5', '\0' };
