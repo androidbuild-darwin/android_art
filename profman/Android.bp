@@ -171,7 +171,7 @@ cc_library_headers {
     host_supported: true,
     target: {
         darwin: {
-            enabled: false,
+            enabled: true,
         },
         windows: {
             enabled: true,
