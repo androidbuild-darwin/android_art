@@ -12,7 +12,7 @@ package {
 
 cc_library_headers {
     name: "libnativeloader-headers",
-    defaults: ["art_defaults"],
+    defaults: ["art_defaults", "art_darwin_aot_defaults"],
     apex_available: [
         "//apex_available:platform",
         "com.android.art",

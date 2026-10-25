@@ -23,7 +23,7 @@ cc_defaults {
 
 cc_library_headers {
     name: "libnativebridge-headers",
-    defaults: ["art_defaults"],
+    defaults: ["art_defaults", "art_darwin_aot_defaults"],
     host_supported: true,
     export_include_dirs: ["include"],
 
