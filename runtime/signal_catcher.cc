@@ -89,15 +89,20 @@ SignalCatcher::SignalCatcher()
 }
 
 SignalCatcher::~SignalCatcher() {
+#if defined(__APPLE__)
+  const uintptr_t pthread_id = reinterpret_cast<uintptr_t>(pthread_);
+#else
+  const uintptr_t pthread_id = static_cast<uintptr_t>(pthread_);
+#endif
   // Since we know the thread is just sitting around waiting for signals
   // to arrive, send it one.
   SetHaltFlag(true);
   CHECK_PTHREAD_CALL(pthread_kill,
                      (pthread_, SIGQUIT),
-                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, reinterpret_cast<uintptr_t>(pthread_)));
+                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, pthread_id));
   CHECK_PTHREAD_CALL(pthread_join,
                      (pthread_, nullptr),
-                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, reinterpret_cast<uintptr_t>(pthread_)));
+                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, pthread_id));
 }
 
 void SignalCatcher::SetHaltFlag(bool new_value) {
