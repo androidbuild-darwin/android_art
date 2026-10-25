@@ -25,7 +25,9 @@
 #include "base/value_object.h"
 #include "thread.h"
 
-#if ART_USE_FUTEXES
+#if defined(__APPLE__)
+#include "darwin_futex.h"
+#elif ART_USE_FUTEXES
 #include <linux/futex.h>
 #include <sys/syscall.h>
 #endif  // ART_USE_FUTEXES
@@ -34,7 +36,7 @@
 
 namespace art HIDDEN {
 
-#if ART_USE_FUTEXES
+#if ART_USE_FUTEXES && !defined(__APPLE__)
 static inline int futex(volatile int *uaddr, int op, int val, const struct timespec *timeout,
                         volatile int *uaddr2, int val3) {
   return syscall(SYS_futex, uaddr, op, val, timeout, uaddr2, val3);

@@ -18,7 +18,7 @@
 #define ART_LIBARTBASE_BASE_ENDIAN_UTILS_H_
 
 #include <stdint.h>
-#include <endian.h>
+#include "android-base/endian.h"
 #include <vector>
 
 namespace art {

@@ -45,6 +45,7 @@ art_cc_defaults {
 art_cc_library_static {
     name: "libelffile",
     defaults: [
+        "art_darwin_aot_defaults",
         "libelffile-defaults",
     ],
     shared_libs: [

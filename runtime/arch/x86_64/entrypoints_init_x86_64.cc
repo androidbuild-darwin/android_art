@@ -26,6 +26,7 @@
 #include "entrypoints/quick/runtime_entrypoints_list.h"
 #include "entrypoints/runtime_asm_entrypoints.h"
 #include "interpreter/interpreter.h"
+#include "runtime.h"
 
 namespace art HIDDEN {
 
@@ -77,8 +78,9 @@ void InitEntryPoints(JniEntryPoints* jpoints,
                      QuickEntryPoints* qpoints,
                      bool monitor_jni_entry_exit) {
 #if defined(__APPLE__)
-  UNUSED(jpoints, qpoints);
-  UNIMPLEMENTED(FATAL);
+  // AOT compilation never invokes the host quick entrypoints.
+  UNUSED(jpoints, qpoints, monitor_jni_entry_exit);
+  CHECK(Runtime::Current()->IsAotCompiler());
 #else
   DefaultInitEntryPoints(jpoints, qpoints, monitor_jni_entry_exit);
 

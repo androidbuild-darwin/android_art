@@ -145,6 +145,7 @@ bool OatQuickMethodHeader::IsNterpMethodHeader() const {
 }
 
 // Find memory range where all libart code is located in memory.
+#if !defined(__APPLE__)
 static ArrayRef<const uint8_t> FindLibartCode() {
   ArrayRef<const uint8_t> result;
 #ifndef __APPLE__
@@ -168,9 +169,10 @@ static ArrayRef<const uint8_t> FindLibartCode() {
 #endif
   return result;
 }
+#endif
 
 // Check if the current method header is in libart.
-std::optional<bool> OatQuickMethodHeader::IsStub(const uint8_t* pc) {
+std::optional<bool> OatQuickMethodHeader::IsStub([[maybe_unused]] const uint8_t* pc) {
 #ifndef __APPLE__
   static ArrayRef<const uint8_t> libart_code = FindLibartCode();
   return libart_code.begin() <= pc && pc < libart_code.end();

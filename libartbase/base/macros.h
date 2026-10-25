@@ -117,7 +117,11 @@ template<typename T> ART_FRIEND_TEST(test_set_name, individual_test)
 // when changing the exported symbols.
 #ifdef NDEBUG
 #define HIDDEN __attribute__((visibility("hidden")))
+#if defined(__APPLE__)
+#define PROTECTED __attribute__((visibility("default")))
+#else
 #define PROTECTED __attribute__((visibility("protected")))
+#endif
 #define EXPORT __attribute__((visibility("default")))
 #else
 #define HIDDEN

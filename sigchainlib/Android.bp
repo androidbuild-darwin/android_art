@@ -27,7 +27,7 @@ package {
 
 cc_library {
     name: "libsigchain",
-    defaults: ["art_defaults"],
+    defaults: ["art_defaults", "art_darwin_aot_defaults"],
     visibility: [
         "//frameworks/base/cmds/app_process",
     ],
@@ -78,7 +78,10 @@ cc_library {
 cc_library_static {
     name: "libsigchain_fake",
     host_supported: true,
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     srcs: ["sigchain_fake.cc"],
     target: {
         android: {

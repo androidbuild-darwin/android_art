@@ -231,9 +231,11 @@ bool FaultManager::HandleSigbusFault(int sig, siginfo_t* info, [[maybe_unused]] 
   // Simulate a crash in a handler.
   raise(SIGBUS);
 #endif
+#if defined(__linux__)
   if (Runtime::Current()->GetHeap()->MarkCompactCollector()->SigbusHandler(info)) {
     return true;
   }
+#endif
 
   // Set a breakpoint in this function to catch unhandled signals.
   art_sigbus_fault();

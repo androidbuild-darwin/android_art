@@ -27,7 +27,10 @@ package {
 
 cc_library_headers {
     name: "art_cmdlineparser_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
     export_include_dirs: ["."],
 

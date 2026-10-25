@@ -68,7 +68,10 @@ cc_defaults {
 
 art_cc_library {
     name: "libnativeloader",
-    defaults: ["libnativeloader-defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "libnativeloader-defaults",
+    ],
     shared_libs: [
         "libbase",
         "liblog",

@@ -362,3 +362,24 @@ java_library {
         },
     },
 }
+
+// Native tools needed to compile Android boot images and apps on x86_64 macOS.
+// This does not enable running the ART virtual machine on macOS.
+cc_defaults {
+    name: "art_darwin_aot_defaults",
+    darwin_universal_binary: false,
+    target: {
+        darwin: {
+            enabled: true,
+            exclude_shared_libs: ["libunwindstack"],
+            exclude_static_libs: ["libunwindstack"],
+            exclude_runtime_libs: ["libjavacore"],
+            cflags: ["-DART_FORCE_USE_READ_BARRIER"],
+            // The Darwin SDK has no ELF headers for the Android output writer.
+            include_dirs: ["external/elfutils/libelf"],
+        },
+        darwin_x86_64: {
+            enabled: true,
+        },
+    },
+}

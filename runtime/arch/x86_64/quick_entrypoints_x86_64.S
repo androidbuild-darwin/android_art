@@ -431,16 +431,16 @@ DEFINE_FUNCTION art_quick_invoke_stub
     // Set up argument XMM registers.
     leaq 1(%r9), %r10             // R10 := shorty + 1  ; ie skip return arg character.
     leaq 4(%rsi), %r11            // R11 := arg_array + 4 ; ie skip this pointer.
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm0, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm1, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm2, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm3, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm4, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm5, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm6, .Lxmm_setup_finished
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm7, .Lxmm_setup_finished
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm0, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm1, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm2, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm3, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm4, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm5, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm6, ART_LOCAL_LABEL(xmm_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm7, ART_LOCAL_LABEL(xmm_setup_finished)
     .balign 16
-.Lxmm_setup_finished:
+ART_LOCAL_LABEL(xmm_setup_finished):
     PUSH rbp                      // Save rbp.
     PUSH r8                       // Save r8/result*.
     PUSH r9                       // Save r9/shorty*.
@@ -476,11 +476,11 @@ DEFINE_FUNCTION art_quick_invoke_stub
     movq %rax, %rdi               // rdi := method to be called
     movl (%r11), %esi             // rsi := this pointer
     addq LITERAL(4), %r11         // arg_array++
-    LOOP_OVER_SHORTY_LOADING_GPRS rdx, edx, .Lgpr_setup_finished
-    LOOP_OVER_SHORTY_LOADING_GPRS rcx, ecx, .Lgpr_setup_finished
-    LOOP_OVER_SHORTY_LOADING_GPRS r8, r8d, .Lgpr_setup_finished
-    LOOP_OVER_SHORTY_LOADING_GPRS r9, r9d, .Lgpr_setup_finished
-.Lgpr_setup_finished:
+    LOOP_OVER_SHORTY_LOADING_GPRS rdx, edx, ART_LOCAL_LABEL(gpr_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_GPRS rcx, ecx, ART_LOCAL_LABEL(gpr_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_GPRS r8, r8d, ART_LOCAL_LABEL(gpr_setup_finished)
+    LOOP_OVER_SHORTY_LOADING_GPRS r9, r9d, ART_LOCAL_LABEL(gpr_setup_finished)
+ART_LOCAL_LABEL(gpr_setup_finished):
     call *ART_METHOD_QUICK_CODE_OFFSET_64(%rdi) // Call the method.
     movq %rbp, %rsp               // Restore stack pointer.
     POP r15                       // Pop r15
@@ -492,15 +492,15 @@ DEFINE_FUNCTION art_quick_invoke_stub
     POP r8                        // Pop r8 - result*.
     POP rbp                       // Pop rbp
     cmpb LITERAL(68), (%r9)       // Test if result type char == 'D'.
-    je .Lreturn_double_quick
+    je ART_LOCAL_LABEL(return_double_quick)
     cmpb LITERAL(70), (%r9)       // Test if result type char == 'F'.
-    je .Lreturn_float_quick
+    je ART_LOCAL_LABEL(return_float_quick)
     movq %rax, (%r8)              // Store the result assuming its a long, int or Object*
     ret
-.Lreturn_double_quick:
+ART_LOCAL_LABEL(return_double_quick):
     movsd %xmm0, (%r8)            // Store the double floating point result.
     ret
-.Lreturn_float_quick:
+ART_LOCAL_LABEL(return_float_quick):
     movss %xmm0, (%r8)            // Store the floating point result.
     ret
 #endif  // __APPLE__
@@ -525,16 +525,16 @@ DEFINE_FUNCTION art_quick_invoke_static_stub
     // Set up argument XMM registers.
     leaq 1(%r9), %r10             // R10 := shorty + 1  ; ie skip return arg character
     movq %rsi, %r11               // R11 := arg_array
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm0, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm1, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm2, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm3, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm4, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm5, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm6, .Lxmm_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_XMMS xmm7, .Lxmm_setup_finished2
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm0, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm1, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm2, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm3, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm4, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm5, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm6, ART_LOCAL_LABEL(xmm_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_XMMS xmm7, ART_LOCAL_LABEL(xmm_setup_finished2)
     .balign 16
-.Lxmm_setup_finished2:
+ART_LOCAL_LABEL(xmm_setup_finished2):
     PUSH rbp                      // Save rbp.
     PUSH r8                       // Save r8/result*.
     PUSH r9                       // Save r9/shorty*.
@@ -568,12 +568,12 @@ DEFINE_FUNCTION art_quick_invoke_static_stub
     rep movsb                      // while (rcx--) { *rdi++ = *rsi++ }
     leaq 1(%r9), %r10              // r10 := shorty + 1  ; ie skip return arg character
     movq %rax, %rdi                // rdi := method to be called
-    LOOP_OVER_SHORTY_LOADING_GPRS rsi, esi, .Lgpr_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_GPRS rdx, edx, .Lgpr_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_GPRS rcx, ecx, .Lgpr_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_GPRS r8, r8d, .Lgpr_setup_finished2
-    LOOP_OVER_SHORTY_LOADING_GPRS r9, r9d, .Lgpr_setup_finished2
-.Lgpr_setup_finished2:
+    LOOP_OVER_SHORTY_LOADING_GPRS rsi, esi, ART_LOCAL_LABEL(gpr_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_GPRS rdx, edx, ART_LOCAL_LABEL(gpr_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_GPRS rcx, ecx, ART_LOCAL_LABEL(gpr_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_GPRS r8, r8d, ART_LOCAL_LABEL(gpr_setup_finished2)
+    LOOP_OVER_SHORTY_LOADING_GPRS r9, r9d, ART_LOCAL_LABEL(gpr_setup_finished2)
+ART_LOCAL_LABEL(gpr_setup_finished2):
     call *ART_METHOD_QUICK_CODE_OFFSET_64(%rdi) // Call the method.
     movq %rbp, %rsp                // Restore stack pointer.
     POP r15                        // Pop r15
@@ -585,15 +585,15 @@ DEFINE_FUNCTION art_quick_invoke_static_stub
     POP r8                         // Pop r8 - result*.
     POP rbp                        // Pop rbp
     cmpb LITERAL(68), (%r9)        // Test if result type char == 'D'.
-    je .Lreturn_double_quick2
+    je ART_LOCAL_LABEL(return_double_quick2)
     cmpb LITERAL(70), (%r9)        // Test if result type char == 'F'.
-    je .Lreturn_float_quick2
+    je ART_LOCAL_LABEL(return_float_quick2)
     movq %rax, (%r8)               // Store the result assuming its a long, int or Object*
     ret
-.Lreturn_double_quick2:
+ART_LOCAL_LABEL(return_double_quick2):
     movsd %xmm0, (%r8)             // Store the double floating point result.
     ret
-.Lreturn_float_quick2:
+ART_LOCAL_LABEL(return_float_quick2):
     movss %xmm0, (%r8)             // Store the floating point result.
     ret
 #endif  // __APPLE__
@@ -863,14 +863,14 @@ MACRO2(ART_QUICK_ALLOC_OBJECT_ROSALLOC, c_name, cxx_name)
     movq   %gs:THREAD_SELF_OFFSET, %r8                     // r8 = thread
     movq   THREAD_LOCAL_ALLOC_STACK_TOP_OFFSET(%r8), %rcx  // rcx = alloc stack top.
     cmpq   THREAD_LOCAL_ALLOC_STACK_END_OFFSET(%r8), %rcx
-    jae    .Lslow_path\c_name
+    jae    ART_LOCAL_LABEL(slow_path)\c_name
                                                            // Load the object size
     movl   MIRROR_CLASS_OBJECT_SIZE_ALLOC_FAST_PATH_OFFSET(%rdi), %eax
                                                            // Check if the size is for a thread
                                                            // local allocation. Also does the
                                                            // initialized and finalizable checks.
     cmpl   LITERAL(ROSALLOC_MAX_THREAD_LOCAL_BRACKET_SIZE), %eax
-    ja     .Lslow_path\c_name
+    ja     ART_LOCAL_LABEL(slow_path)\c_name
                                                            // Compute the rosalloc bracket index
                                                            // from the size.
     shrq   LITERAL(ROSALLOC_BRACKET_QUANTUM_SIZE_SHIFT), %rax
@@ -884,7 +884,7 @@ MACRO2(ART_QUICK_ALLOC_OBJECT_ROSALLOC, c_name, cxx_name)
                                                            // will be the return val.
     movq   (ROSALLOC_RUN_FREE_LIST_OFFSET + ROSALLOC_RUN_FREE_LIST_HEAD_OFFSET)(%r9), %rax
     testq  %rax, %rax
-    jz     .Lslow_path\c_name
+    jz     ART_LOCAL_LABEL(slow_path)\c_name
     // "Point of no slow path". Won't go to the slow path from here on. OK to clobber rdi and rsi.
                                                            // Push the new object onto the thread
                                                            // local allocation stack and
@@ -911,7 +911,7 @@ MACRO2(ART_QUICK_ALLOC_OBJECT_ROSALLOC, c_name, cxx_name)
     decl   (ROSALLOC_RUN_FREE_LIST_OFFSET + ROSALLOC_RUN_FREE_LIST_SIZE_OFFSET)(%r9)
                                                            // No fence necessary for x86.
     ret
-.Lslow_path\c_name:
+ART_LOCAL_LABEL(slow_path)\c_name:
     SETUP_SAVE_REFS_ONLY_FRAME                             // save ref containing registers for GC
     // Outgoing argument set up
     movq %gs:THREAD_SELF_OFFSET, %rsi                      // pass Thread::Current()
@@ -997,8 +997,8 @@ END_MACRO
 DEFINE_FUNCTION art_quick_alloc_object_resolved_tlab
     // RDI: mirror::Class* klass
     // RDX, RSI, RCX, R8, R9: free. RAX: return val.
-    ALLOC_OBJECT_RESOLVED_TLAB_FAST_PATH .Lart_quick_alloc_object_resolved_tlab_slow_path
-.Lart_quick_alloc_object_resolved_tlab_slow_path:
+    ALLOC_OBJECT_RESOLVED_TLAB_FAST_PATH ART_LOCAL_LABEL(art_quick_alloc_object_resolved_tlab_slow_path)
+ART_LOCAL_LABEL(art_quick_alloc_object_resolved_tlab_slow_path):
     ALLOC_OBJECT_TLAB_SLOW_PATH artAllocObjectFromCodeResolvedTLAB
 END_FUNCTION art_quick_alloc_object_resolved_tlab
 
@@ -1007,8 +1007,8 @@ END_FUNCTION art_quick_alloc_object_resolved_tlab
 DEFINE_FUNCTION art_quick_alloc_object_initialized_tlab
     // RDI: mirror::Class* klass
     // RDX, RSI, RCX, R8, R9: free. RAX: return val.
-    ALLOC_OBJECT_INITIALIZED_TLAB_FAST_PATH .Lart_quick_alloc_object_initialized_tlab_slow_path
-.Lart_quick_alloc_object_initialized_tlab_slow_path:
+    ALLOC_OBJECT_INITIALIZED_TLAB_FAST_PATH ART_LOCAL_LABEL(art_quick_alloc_object_initialized_tlab_slow_path)
+ART_LOCAL_LABEL(art_quick_alloc_object_initialized_tlab_slow_path):
     ALLOC_OBJECT_TLAB_SLOW_PATH artAllocObjectFromCodeInitializedTLAB
 END_FUNCTION art_quick_alloc_object_initialized_tlab
 
@@ -1070,8 +1070,8 @@ MACRO3(GENERATE_ALLOC_ARRAY_TLAB, c_entrypoint, cxx_name, size_setup)
     // RDI: mirror::Class* klass, RSI: int32_t component_count
     // RDX, RCX, R8, R9: free. RAX: return val.
     CALL_MACRO(size_setup)
-    ALLOC_ARRAY_TLAB_FAST_PATH_RESOLVED_WITH_SIZE .Lslow_path\c_entrypoint
-.Lslow_path\c_entrypoint:
+    ALLOC_ARRAY_TLAB_FAST_PATH_RESOLVED_WITH_SIZE ART_LOCAL_LABEL(slow_path)\c_entrypoint
+ART_LOCAL_LABEL(slow_path)\c_entrypoint:
     SETUP_SAVE_REFS_ONLY_FRAME                                 // save ref containing registers for GC
     // Outgoing argument set up
     movq %gs:THREAD_SELF_OFFSET, %rdx                          // pass Thread::Current()
@@ -1100,8 +1100,8 @@ DEFINE_FUNCTION art_quick_alloc_object_resolved_region_tlab
     // RDI: mirror::Class* klass
     // RDX, RSI, RCX, R8, R9: free. RAX: return val.
     ASSERT_USE_READ_BARRIER
-    ALLOC_OBJECT_RESOLVED_TLAB_FAST_PATH .Lart_quick_alloc_object_resolved_region_tlab_slow_path
-.Lart_quick_alloc_object_resolved_region_tlab_slow_path:
+    ALLOC_OBJECT_RESOLVED_TLAB_FAST_PATH ART_LOCAL_LABEL(art_quick_alloc_object_resolved_region_tlab_slow_path)
+ART_LOCAL_LABEL(art_quick_alloc_object_resolved_region_tlab_slow_path):
     ALLOC_OBJECT_TLAB_SLOW_PATH artAllocObjectFromCodeResolvedRegionTLAB
 END_FUNCTION art_quick_alloc_object_resolved_region_tlab
 
@@ -1112,8 +1112,8 @@ DEFINE_FUNCTION art_quick_alloc_object_initialized_region_tlab
     // RDX, RSI, RCX, R8, R9: free. RAX: return val.
     ASSERT_USE_READ_BARRIER
     // No read barrier since the caller is responsible for that.
-    ALLOC_OBJECT_INITIALIZED_TLAB_FAST_PATH .Lart_quick_alloc_object_initialized_region_tlab_slow_path
-.Lart_quick_alloc_object_initialized_region_tlab_slow_path:
+    ALLOC_OBJECT_INITIALIZED_TLAB_FAST_PATH ART_LOCAL_LABEL(art_quick_alloc_object_initialized_region_tlab_slow_path)
+ART_LOCAL_LABEL(art_quick_alloc_object_initialized_region_tlab_slow_path):
     ALLOC_OBJECT_TLAB_SLOW_PATH artAllocObjectFromCodeInitializedRegionTLAB
 END_FUNCTION art_quick_alloc_object_initialized_region_tlab
 
@@ -1135,8 +1135,8 @@ TWO_ARG_DOWNCALL art_quick_handle_fill_data, \
      */
 DEFINE_FUNCTION art_quick_lock_object
     testq %rdi, %rdi                      // Null check object.
-    jz   art_quick_lock_object_no_inline
-    LOCK_OBJECT_FAST_PATH rdi, ecx, art_quick_lock_object_no_inline
+    jz   SYMBOL(art_quick_lock_object_no_inline)
+    LOCK_OBJECT_FAST_PATH rdi, ecx, SYMBOL(art_quick_lock_object_no_inline)
 END_FUNCTION art_quick_lock_object
 
     /*
@@ -1159,8 +1159,8 @@ END_FUNCTION art_quick_lock_object_no_inline
      */
 DEFINE_FUNCTION art_quick_unlock_object
     testq %rdi, %rdi                      // Null check object.
-    jz   art_quick_lock_object_no_inline
-    UNLOCK_OBJECT_FAST_PATH rdi, ecx, /*saved_rax*/ none, art_quick_unlock_object_no_inline
+    jz   SYMBOL(art_quick_lock_object_no_inline)
+    UNLOCK_OBJECT_FAST_PATH rdi, ecx, /*saved_rax*/ none, SYMBOL(art_quick_unlock_object_no_inline)
 END_FUNCTION art_quick_unlock_object
 
     /*
@@ -1180,7 +1180,7 @@ END_FUNCTION art_quick_unlock_object_no_inline
 DEFINE_FUNCTION art_quick_check_instance_of
     // Type check using the bit string passes null as the target class. In that case just throw.
     testl %esi, %esi
-    jz .Lthrow_class_cast_exception_for_bitstring_check
+    jz ART_LOCAL_LABEL(throw_class_cast_exception_for_bitstring_check)
 
     // We could check the super classes here but that is usually already checked in the caller.
     PUSH rdi                          // Save args for exc
@@ -1191,13 +1191,13 @@ DEFINE_FUNCTION art_quick_check_instance_of
     call SYMBOL(artInstanceOfFromCode)  // (Object* obj, Class* ref_klass)
     CFI_REMEMBER_STATE
     testq %rax, %rax
-    jz .Lthrow_class_cast_exception   // jump forward if not assignable
+    jz ART_LOCAL_LABEL(throw_class_cast_exception)   // jump forward if not assignable
     RESTORE_FP_CALLEE_SAVE_FRAME
     addq LITERAL(24), %rsp            // pop arguments
     CFI_ADJUST_CFA_OFFSET(-24)
     ret
 
-.Lthrow_class_cast_exception:
+ART_LOCAL_LABEL(throw_class_cast_exception):
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, 64  // Reset unwind info so following code unwinds.
     RESTORE_FP_CALLEE_SAVE_FRAME
     addq LITERAL(8), %rsp             // pop padding
@@ -1205,7 +1205,7 @@ DEFINE_FUNCTION art_quick_check_instance_of
     POP rsi                           // Pop arguments
     POP rdi
 
-.Lthrow_class_cast_exception_for_bitstring_check:
+ART_LOCAL_LABEL(throw_class_cast_exception_for_bitstring_check):
     SETUP_SAVE_ALL_CALLEE_SAVES_FRAME // save all registers as basis for long jump context
     mov %gs:THREAD_SELF_OFFSET, %rdx  // pass Thread::Current()
     call SYMBOL(artThrowClassCastExceptionForObject)  // (Object* src, Class* dest, Thread*)
@@ -1226,18 +1226,18 @@ END_MACRO
 
 DEFINE_FUNCTION art_quick_aput_obj
     test %edx, %edx              // store of null
-    jz .Laput_obj_null
+    jz ART_LOCAL_LABEL(aput_obj_null)
     movl MIRROR_OBJECT_CLASS_OFFSET(%rdi), %ecx
     UNPOISON_HEAP_REF ecx
 #ifdef USE_READ_BARRIER
     cmpl LITERAL(0), %gs:THREAD_IS_GC_MARKING_OFFSET
     CFI_REMEMBER_STATE
-    jnz .Laput_obj_gc_marking
+    jnz ART_LOCAL_LABEL(aput_obj_gc_marking)
 #endif  // USE_READ_BARRIER
     movl MIRROR_CLASS_COMPONENT_TYPE_OFFSET(%rcx), %ecx
     cmpl MIRROR_OBJECT_CLASS_OFFSET(%rdx), %ecx  // Both poisoned if heap poisoning is enabled.
-    jne .Laput_obj_check_assignability
-.Laput_obj_store:
+    jne ART_LOCAL_LABEL(aput_obj_check_assignability)
+ART_LOCAL_LABEL(aput_obj_store):
     POISON_HEAP_REF edx
     movl %edx, MIRROR_OBJECT_ARRAY_DATA_OFFSET(%rdi, %rsi, 4)
     movq %gs:THREAD_CARD_TABLE_OFFSET, %rdx
@@ -1245,18 +1245,18 @@ DEFINE_FUNCTION art_quick_aput_obj
     movb %dl, (%rdx, %rdi)
     ret
 
-.Laput_obj_null:
+ART_LOCAL_LABEL(aput_obj_null):
     movl %edx, MIRROR_OBJECT_ARRAY_DATA_OFFSET(%rdi, %rsi, 4)
     ret
 
-.Laput_obj_check_assignability:
+ART_LOCAL_LABEL(aput_obj_check_assignability):
     UNPOISON_HEAP_REF ecx         // Unpoison array component type if poisoning is enabled.
     PUSH_ARG rdi                  // Save arguments.
     PUSH_ARG rsi
     PUSH_ARG rdx
     movl MIRROR_OBJECT_CLASS_OFFSET(%rdx), %esi  // Pass arg2 = value's class.
     UNPOISON_HEAP_REF esi
-.Laput_obj_check_assignability_call:
+ART_LOCAL_LABEL(aput_obj_check_assignability_call):
     movl %ecx, %edi               // Pass arg1 = array's component type.
     SETUP_FP_CALLEE_SAVE_FRAME
     call SYMBOL(artIsAssignableFromCode)  // (Class* a, Class* b)
@@ -1265,7 +1265,7 @@ DEFINE_FUNCTION art_quick_aput_obj
     POP_ARG rsi
     POP_ARG rdi
     testq %rax, %rax              // Check for exception.
-    jz   .Laput_obj_throw_array_store_exception
+    jz   ART_LOCAL_LABEL(aput_obj_throw_array_store_exception)
     POISON_HEAP_REF edx
     movl %edx, MIRROR_OBJECT_ARRAY_DATA_OFFSET(%rdi, %rsi, 4)
     movq %gs:THREAD_CARD_TABLE_OFFSET, %rdx
@@ -1273,7 +1273,7 @@ DEFINE_FUNCTION art_quick_aput_obj
     movb %dl, (%rdx, %rdi)
     ret
 
-.Laput_obj_throw_array_store_exception:
+ART_LOCAL_LABEL(aput_obj_throw_array_store_exception):
     SETUP_SAVE_ALL_CALLEE_SAVES_FRAME  // Save all registers as basis for long jump context.
     // Outgoing argument set up.
     movq %rdx, %rsi                          // Pass arg 2 = value.
@@ -1285,7 +1285,7 @@ DEFINE_FUNCTION art_quick_aput_obj
     UNREACHABLE
 
 #ifdef USE_READ_BARRIER
-.Laput_obj_gc_marking:
+ART_LOCAL_LABEL(aput_obj_gc_marking):
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, 8
     // We need to align stack for `art_quick_read_barrier_mark_regNN`.
     INCREASE_FRAME 8                        // Stack alignment.
@@ -1298,14 +1298,14 @@ DEFINE_FUNCTION art_quick_aput_obj
     call SYMBOL(art_quick_read_barrier_mark_reg00)  // Mark EAX
     DECREASE_FRAME 8                        // Remove stack alignment.
     cmpl %eax, %ecx
-    je .Laput_obj_store
-    // Prepare arguments in line with `.Laput_obj_check_assignability_call` and jump there.
+    je ART_LOCAL_LABEL(aput_obj_store)
+    // Prepare arguments in line with `ART_LOCAL_LABEL(aput_obj_check_assignability_call)` and jump there.
     PUSH_ARG rdi                  // Save arguments.
     PUSH_ARG rsi
     PUSH_ARG rdx
     movl %eax, %esi               // Pass arg2 - type of the value to be stored.
-    // The arg1 shall be moved at `.Ldo_assignability_check_call`.
-    jmp .Laput_obj_check_assignability_call
+    // The arg1 shall be moved at `ART_LOCAL_LABEL(do_assignability_check_call)`.
+    jmp ART_LOCAL_LABEL(aput_obj_check_assignability_call)
 #endif  // USE_READ_BARRIER
 END_FUNCTION art_quick_aput_obj
 
@@ -1323,13 +1323,13 @@ DEFINE_FUNCTION art_quick_test_suspend
 
     CFI_REMEMBER_STATE
     testq %rax, %rax
-    jnz .Ltest_suspend_deoptimize
+    jnz ART_LOCAL_LABEL(test_suspend_deoptimize)
 
     // Normal return.
     RESTORE_SAVE_EVERYTHING_FRAME               // restore frame up to return address
     ret
 
-.Ltest_suspend_deoptimize:
+ART_LOCAL_LABEL(test_suspend_deoptimize):
     // Deoptimize.
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, FRAME_SIZE_SAVE_EVERYTHING
     movq %rax, %rdi                             // pass Context*
@@ -1370,21 +1370,21 @@ DEFINE_FUNCTION art_quick_imt_conflict_trampoline
     int3
 #else
     movq ART_METHOD_JNI_OFFSET_64(%rdi), %rdi  // Load ImtConflictTable
-.Limt_table_iterate:
+ART_LOCAL_LABEL(imt_table_iterate):
     cmpq %rax, 0(%rdi)
-    jne .Limt_table_next_entry
+    jne ART_LOCAL_LABEL(imt_table_next_entry)
     // We successfully hit an entry in the table. Load the target method
     // and jump to it.
     movq __SIZEOF_POINTER__(%rdi), %rdi
     jmp *ART_METHOD_QUICK_CODE_OFFSET_64(%rdi)
-.Limt_table_next_entry:
+ART_LOCAL_LABEL(imt_table_next_entry):
     // If the entry is null, the interface method is not in the ImtConflictTable.
     cmpq LITERAL(0), 0(%rdi)
-    jz .Lconflict_trampoline
+    jz ART_LOCAL_LABEL(conflict_trampoline)
     // Iterate over the entries of the ImtConflictTable.
     addq LITERAL(2 * __SIZEOF_POINTER__), %rdi
-    jmp .Limt_table_iterate
-.Lconflict_trampoline:
+    jmp ART_LOCAL_LABEL(imt_table_iterate)
+ART_LOCAL_LABEL(conflict_trampoline):
     // Call the runtime stub to populate the ImtConflictTable and jump to the
     // resolved method.
     movq %rax, %rdi  // Load interface method
@@ -1506,7 +1506,7 @@ DEFINE_FUNCTION art_quick_generic_jni_trampoline
 
     // Check for error (class init check or locking for synchronized native method can throw).
     test %rax, %rax
-    jz .Lexception_in_native
+    jz ART_LOCAL_LABEL(exception_in_native)
 
     // pop from the register-passing alloca region
     // what's the right layout?
@@ -1551,7 +1551,7 @@ DEFINE_FUNCTION art_quick_generic_jni_trampoline
     // TODO: use cmpq, needs direct encoding because of gas bug
     movq %gs:THREAD_EXCEPTION_OFFSET, %rcx
     test %rcx, %rcx
-    jnz .Lexception_in_native
+    jnz ART_LOCAL_LABEL(exception_in_native)
 
     // Tear down the alloca.
     movq %rbp, %rsp
@@ -1562,8 +1562,8 @@ DEFINE_FUNCTION art_quick_generic_jni_trampoline
     LOAD_RUNTIME_INSTANCE rcx
     cmpb MACRO_LITERAL(0), RUN_EXIT_HOOKS_OFFSET_FROM_RUNTIME_INSTANCE(%rcx)
     CFI_REMEMBER_STATE
-    jne .Lcall_method_exit_hook
-.Lcall_method_exit_hook_done:
+    jne ART_LOCAL_LABEL(call_method_exit_hook)
+ART_LOCAL_LABEL(call_method_exit_hook_done):
 
     // Tear down the callee-save frame.
     CFI_DEF_CFA_REGISTER(rsp)
@@ -1584,17 +1584,17 @@ DEFINE_FUNCTION art_quick_generic_jni_trampoline
     POP r15  // Callee save.
     ret
 
-.Lcall_method_exit_hook:
+ART_LOCAL_LABEL(call_method_exit_hook):
     CFI_RESTORE_STATE_AND_DEF_CFA rbp, 208
     movq LITERAL(FRAME_SIZE_SAVE_REFS_AND_ARGS), %r8
-    call art_quick_method_exit_hook
-    jmp .Lcall_method_exit_hook_done
+    call SYMBOL(art_quick_method_exit_hook)
+    jmp ART_LOCAL_LABEL(call_method_exit_hook_done)
 
-.Lexception_in_native:
+ART_LOCAL_LABEL(exception_in_native):
     pushq %gs:THREAD_TOP_QUICK_FRAME_OFFSET
     addq LITERAL(-1), (%rsp)  // Remove the GenericJNI tag.
     movq (%rsp), %rsp
-    call art_deliver_pending_exception
+    call SYMBOL(art_deliver_pending_exception)
 END_FUNCTION art_quick_generic_jni_trampoline
 
 DEFINE_FUNCTION art_deliver_pending_exception
@@ -1654,61 +1654,61 @@ DEFINE_FUNCTION art_quick_string_compareto
 #if (STRING_COMPRESSION_FEATURE)
     /* Differ cases */
     shrl    LITERAL(1), %r8d
-    jnc     .Lstring_compareto_this_is_compressed
+    jnc     ART_LOCAL_LABEL(string_compareto_this_is_compressed)
     shrl    LITERAL(1), %r9d
-    jnc     .Lstring_compareto_that_is_compressed
-    jmp     .Lstring_compareto_both_not_compressed
-.Lstring_compareto_this_is_compressed:
+    jnc     ART_LOCAL_LABEL(string_compareto_that_is_compressed)
+    jmp     ART_LOCAL_LABEL(string_compareto_both_not_compressed)
+ART_LOCAL_LABEL(string_compareto_this_is_compressed):
     shrl    LITERAL(1), %r9d
-    jnc     .Lstring_compareto_both_compressed
+    jnc     ART_LOCAL_LABEL(string_compareto_both_compressed)
     /* Comparison this (8-bit) and that (16-bit) */
     mov     %r8d, %eax
     subl    %r9d, %eax
     mov     %r8d, %ecx
     cmovg   %r9d, %ecx
     /* Going into loop to compare each character */
-    jecxz   .Lstring_compareto_keep_length1     // check loop counter (if 0 then stop)
-.Lstring_compareto_loop_comparison_this_compressed:
+    jecxz   ART_LOCAL_LABEL(string_compareto_keep_length1)     // check loop counter (if 0 then stop)
+ART_LOCAL_LABEL(string_compareto_loop_comparison_this_compressed):
     movzbl  (%edi), %r8d                        // move *(this_cur_char) byte to long
     movzwl  (%esi), %r9d                        // move *(that_cur_char) word to long
     addl    LITERAL(1), %edi                    // ++this_cur_char (8-bit)
     addl    LITERAL(2), %esi                    // ++that_cur_char (16-bit)
     subl    %r9d, %r8d
-    loope   .Lstring_compareto_loop_comparison_this_compressed
+    loope   ART_LOCAL_LABEL(string_compareto_loop_comparison_this_compressed)
     cmovne  %r8d, %eax                          // return eax = *(this_cur_char) - *(that_cur_char)
-.Lstring_compareto_keep_length1:
+ART_LOCAL_LABEL(string_compareto_keep_length1):
     ret
-.Lstring_compareto_that_is_compressed:
+ART_LOCAL_LABEL(string_compareto_that_is_compressed):
     movl    %r8d, %eax
     subl    %r9d, %eax
     mov     %r8d, %ecx
     cmovg   %r9d, %ecx
     /* Comparison this (8-bit) and that (16-bit) */
-    jecxz   .Lstring_compareto_keep_length2     // check loop counter (if 0, don't compare)
-.Lstring_compareto_loop_comparison_that_compressed:
+    jecxz   ART_LOCAL_LABEL(string_compareto_keep_length2)     // check loop counter (if 0, don't compare)
+ART_LOCAL_LABEL(string_compareto_loop_comparison_that_compressed):
     movzwl  (%edi), %r8d                        // move *(this_cur_char) word to long
     movzbl  (%esi), %r9d                        // move *(that_cur_chat) byte to long
     addl    LITERAL(2), %edi                    // ++this_cur_char (16-bit)
     addl    LITERAL(1), %esi                    // ++that_cur_char (8-bit)
     subl    %r9d, %r8d
-    loope   .Lstring_compareto_loop_comparison_that_compressed
+    loope   ART_LOCAL_LABEL(string_compareto_loop_comparison_that_compressed)
     cmovne  %r8d, %eax                          // return eax = *(this_cur_char) - *(that_cur_char)
-.Lstring_compareto_keep_length2:
+ART_LOCAL_LABEL(string_compareto_keep_length2):
     ret
-.Lstring_compareto_both_compressed:
+ART_LOCAL_LABEL(string_compareto_both_compressed):
     /* Calculate min length and count diff */
     movl    %r8d, %ecx
     movl    %r8d, %eax
     subl    %r9d, %eax
     cmovg   %r9d, %ecx
-    jecxz   .Lstring_compareto_keep_length3
+    jecxz   ART_LOCAL_LABEL(string_compareto_keep_length3)
     repe    cmpsb
-    je      .Lstring_compareto_keep_length3
+    je      ART_LOCAL_LABEL(string_compareto_keep_length3)
     movzbl  -1(%edi), %eax        // get last compared char from this string (8-bit)
     movzbl  -1(%esi), %ecx        // get last compared char from comp string (8-bit)
-    jmp     .Lstring_compareto_count_difference
+    jmp     ART_LOCAL_LABEL(string_compareto_count_difference)
 #endif // STRING_COMPRESSION_FEATURE
-.Lstring_compareto_both_not_compressed:
+ART_LOCAL_LABEL(string_compareto_both_not_compressed):
     /* Calculate min length and count diff */
     movl    %r8d, %ecx
     movl    %r8d, %eax
@@ -1721,14 +1721,14 @@ DEFINE_FUNCTION art_quick_string_compareto
      *   esi: pointer to comp string data
      *   edi: pointer to this string data
      */
-    jecxz .Lstring_compareto_keep_length3
+    jecxz ART_LOCAL_LABEL(string_compareto_keep_length3)
     repe  cmpsw                   // find nonmatching chars in [%esi] and [%edi], up to length %ecx
-    je    .Lstring_compareto_keep_length3
+    je    ART_LOCAL_LABEL(string_compareto_keep_length3)
     movzwl  -2(%edi), %eax        // get last compared char from this string (16-bit)
     movzwl  -2(%esi), %ecx        // get last compared char from comp string (16-bit)
-.Lstring_compareto_count_difference:
+ART_LOCAL_LABEL(string_compareto_count_difference):
     subl  %ecx, %eax              // return the difference
-.Lstring_compareto_keep_length3:
+ART_LOCAL_LABEL(string_compareto_keep_length3):
     ret
 END_FUNCTION art_quick_string_compareto
 
@@ -1750,7 +1750,7 @@ DEFINE_FUNCTION art_quick_string_builder_append
     // Outgoing argument set up
     leaq FRAME_SIZE_SAVE_REFS_ONLY + __SIZEOF_POINTER__(%rsp), %rsi  // pass args
     movq %gs:THREAD_SELF_OFFSET, %rdx         // pass Thread::Current()
-    call artStringBuilderAppend               // (uint32_t, const unit32_t*, Thread*)
+    call SYMBOL(artStringBuilderAppend)               // (uint32_t, const unit32_t*, Thread*)
     RESTORE_SAVE_REFS_ONLY_FRAME              // restore frame up to return address
     RETURN_OR_DEOPT_IF_RESULT_IS_NON_NULL_OR_DELIVER  // return or deopt or deliver exception
 END_FUNCTION art_quick_string_builder_append
@@ -1768,13 +1768,13 @@ MACRO2(READ_BARRIER_MARK_REG, name, reg)
     DEFINE_FUNCTION VAR(name)
     // Null check so that we can load the lock word.
     testq REG_VAR(reg), REG_VAR(reg)
-    jz .Lret_rb_\name
-.Lnot_null_\name:
+    jz ART_LOCAL_LABEL(ret_rb_)\name
+ART_LOCAL_LABEL(not_null_)\name:
     // Check the mark bit, if it is 1 return.
     testl LITERAL(LOCK_WORD_MARK_BIT_MASK_SHIFTED), MIRROR_OBJECT_LOCK_WORD_OFFSET(REG_VAR(reg))
-    jz .Lslow_rb_\name
+    jz ART_LOCAL_LABEL(slow_rb_)\name
     ret
-.Lslow_rb_\name:
+ART_LOCAL_LABEL(slow_rb_)\name:
     PUSH rax
     movl MIRROR_OBJECT_LOCK_WORD_OFFSET(REG_VAR(reg)), %eax
     addl LITERAL(LOCK_WORD_STATE_FORWARDING_ADDRESS_OVERFLOW), %eax
@@ -1782,7 +1782,7 @@ MACRO2(READ_BARRIER_MARK_REG, name, reg)
     // forwarding address one.
     // Taken ~25% of the time.
     CFI_REMEMBER_STATE
-    jnae .Lret_forwarding_address\name
+    jnae ART_LOCAL_LABEL(ret_forwarding_address)\name
 
     // Save all potentially live caller-save core registers.
     movq 0(%rsp), %rax
@@ -1846,9 +1846,9 @@ MACRO2(READ_BARRIER_MARK_REG, name, reg)
     POP_REG_NE rdx, RAW_VAR(reg)
     POP_REG_NE rcx, RAW_VAR(reg)
     POP_REG_NE rax, RAW_VAR(reg)
-.Lret_rb_\name:
+ART_LOCAL_LABEL(ret_rb_)\name:
     ret
-.Lret_forwarding_address\name:
+ART_LOCAL_LABEL(ret_forwarding_address)\name:
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, 16
     // The overflow cleared the top bits.
     sall LITERAL(LOCK_WORD_STATE_FORWARDING_ADDRESS_SHIFT), %eax
@@ -1928,9 +1928,9 @@ DEFINE_FUNCTION art_quick_osr_stub
     CFI_ADJUST_CFA_OFFSET(8)
     movl %esi, %ecx               // rcx := size of stack
     movq %rdi, %rsi               // rsi := stack to copy
-    movq %rsp, %rbp               // Save stack pointer to RBP for CFI use in .Losr_entry.
+    movq %rsp, %rbp               // Save stack pointer to RBP for CFI use in ART_LOCAL_LABEL(osr_entry).
     CFI_REMEMBER_STATE
-    call .Losr_entry
+    call ART_LOCAL_LABEL(osr_entry)
 
     // Restore stack and callee-saves.
     addq LITERAL(8), %rsp
@@ -1945,7 +1945,7 @@ DEFINE_FUNCTION art_quick_osr_stub
     POP rbp
     movq %rax, (%rcx)              // Store the result.
     ret
-.Losr_entry:
+ART_LOCAL_LABEL(osr_entry):
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, 80
     // Since the call has pushed the return address we need to switch the CFA register to RBP.
     CFI_DEF_CFA_REGISTER(rbp)
@@ -2007,47 +2007,47 @@ DEFINE_FUNCTION art_quick_update_inline_cache
 #endif
     // Don't update the cache if we are marking.
     cmpl LITERAL(0), %gs:THREAD_IS_GC_MARKING_OFFSET
-    jnz .Ldone
-.Lentry1:
+    jnz ART_LOCAL_LABEL(done)
+ART_LOCAL_LABEL(entry1):
     movl INLINE_CACHE_CLASSES_OFFSET(%r11), %eax
     cmpl %edi, %eax
-    je .Ldone
+    je ART_LOCAL_LABEL(done)
     cmpl LITERAL(0), %eax
-    jne .Lentry2
+    jne ART_LOCAL_LABEL(entry2)
     lock cmpxchg %edi, INLINE_CACHE_CLASSES_OFFSET(%r11)
-    jz .Ldone
-    jmp .Lentry1
-.Lentry2:
+    jz ART_LOCAL_LABEL(done)
+    jmp ART_LOCAL_LABEL(entry1)
+ART_LOCAL_LABEL(entry2):
     movl (INLINE_CACHE_CLASSES_OFFSET+4)(%r11), %eax
     cmpl %edi, %eax
-    je .Ldone
+    je ART_LOCAL_LABEL(done)
     cmpl LITERAL(0), %eax
-    jne .Lentry3
+    jne ART_LOCAL_LABEL(entry3)
     lock cmpxchg %edi, (INLINE_CACHE_CLASSES_OFFSET+4)(%r11)
-    jz .Ldone
-    jmp .Lentry2
-.Lentry3:
+    jz ART_LOCAL_LABEL(done)
+    jmp ART_LOCAL_LABEL(entry2)
+ART_LOCAL_LABEL(entry3):
     movl (INLINE_CACHE_CLASSES_OFFSET+8)(%r11), %eax
     cmpl %edi, %eax
-    je .Ldone
+    je ART_LOCAL_LABEL(done)
     cmpl LITERAL(0), %eax
-    jne .Lentry4
+    jne ART_LOCAL_LABEL(entry4)
     lock cmpxchg %edi, (INLINE_CACHE_CLASSES_OFFSET+8)(%r11)
-    jz .Ldone
-    jmp .Lentry3
-.Lentry4:
+    jz ART_LOCAL_LABEL(done)
+    jmp ART_LOCAL_LABEL(entry3)
+ART_LOCAL_LABEL(entry4):
     movl (INLINE_CACHE_CLASSES_OFFSET+12)(%r11), %eax
     cmpl %edi, %eax
-    je .Ldone
+    je ART_LOCAL_LABEL(done)
     cmpl LITERAL(0), %eax
-    jne .Lentry5
+    jne ART_LOCAL_LABEL(entry5)
     lock cmpxchg %edi, (INLINE_CACHE_CLASSES_OFFSET+12)(%r11)
-    jz .Ldone
-    jmp .Lentry4
-.Lentry5:
+    jz ART_LOCAL_LABEL(done)
+    jmp ART_LOCAL_LABEL(entry4)
+ART_LOCAL_LABEL(entry5):
     // Unconditionally store, the cache is megamorphic.
     movl %edi, (INLINE_CACHE_CLASSES_OFFSET+16)(%r11)
-.Ldone:
+ART_LOCAL_LABEL(done):
     ret
 END_FUNCTION art_quick_update_inline_cache
 
@@ -2072,13 +2072,13 @@ DEFINE_FUNCTION art_quick_method_entry_hook
 
     CFI_REMEMBER_STATE
     testq %rax, %rax
-    jnz .Lentryhook_deopt
+    jnz ART_LOCAL_LABEL(entryhook_deopt)
 
     // Normal return.
     RESTORE_SAVE_EVERYTHING_FRAME
     ret
 
-.Lentryhook_deopt:
+ART_LOCAL_LABEL(entryhook_deopt):
     // Deoptimize.
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, FRAME_SIZE_SAVE_EVERYTHING
     movq %rax, %rdi                             // pass Context*
@@ -2101,13 +2101,13 @@ DEFINE_FUNCTION art_quick_method_exit_hook
 
     CFI_REMEMBER_STATE
     testq %rax, %rax
-    jnz .Lexithook_deopt_or_exception
+    jnz ART_LOCAL_LABEL(exithook_deopt_or_exception)
 
     // Normal return.
     RESTORE_SAVE_EVERYTHING_FRAME
     ret
 
-.Lexithook_deopt_or_exception:
+ART_LOCAL_LABEL(exithook_deopt_or_exception):
     // Deoptimize or exception thrown.
     CFI_RESTORE_STATE_AND_DEF_CFA rsp, FRAME_SIZE_SAVE_EVERYTHING
     movq %rax, %rdi                             // pass Context*

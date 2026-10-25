@@ -16,6 +16,8 @@
 
 #include "signal_catcher.h"
 
+#include <cinttypes>
+
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <fcntl.h>
@@ -92,10 +94,10 @@ SignalCatcher::~SignalCatcher() {
   SetHaltFlag(true);
   CHECK_PTHREAD_CALL(pthread_kill,
                      (pthread_, SIGQUIT),
-                     android::base::StringPrintf("signal catcher shutdown: %lu", pthread_));
+                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, reinterpret_cast<uintptr_t>(pthread_)));
   CHECK_PTHREAD_CALL(pthread_join,
                      (pthread_, nullptr),
-                     android::base::StringPrintf("signal catcher shutdown: %lu", pthread_));
+                     android::base::StringPrintf("signal catcher shutdown: %" PRIuPTR, reinterpret_cast<uintptr_t>(pthread_)));
 }
 
 void SignalCatcher::SetHaltFlag(bool new_value) {

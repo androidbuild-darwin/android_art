@@ -25,7 +25,9 @@
 #include "art_method.h"
 
 // For DumpNativeStack.
+#if defined(__linux__)
 #include <unwindstack/AndroidUnwinder.h>
+#endif
 
 #if defined(__linux__)
 
@@ -322,12 +324,12 @@ void DumpNativeStack(std::ostream& os,
                      ArtMethod* current_method,
                      void* ucontext_ptr,
                      bool skip_frames) {
-  unwindstack::AndroidLocalUnwinder unwinder;
+  NativeStackUnwinder unwinder;
   DumpNativeStack(os, unwinder, tid, prefix, current_method, ucontext_ptr, skip_frames);
 }
 
 void DumpNativeStack(std::ostream& os,
-                     unwindstack::AndroidLocalUnwinder& unwinder,
+                     NativeStackUnwinder& unwinder,
                      pid_t tid,
                      const char* prefix,
                      ArtMethod* current_method,
@@ -439,7 +441,7 @@ void DumpNativeStack([[maybe_unused]] std::ostream& os,
                      [[maybe_unused]] bool skip_frames) {}
 
 void DumpNativeStack([[maybe_unused]] std::ostream& os,
-                     [[maybe_unused]] unwindstack::AndroidLocalUnwinder& existing_map,
+                     [[maybe_unused]] NativeStackUnwinder& existing_map,
                      [[maybe_unused]] pid_t tid,
                      [[maybe_unused]] const char* prefix,
                      [[maybe_unused]] ArtMethod* current_method,

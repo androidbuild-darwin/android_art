@@ -31,6 +31,13 @@ namespace art HIDDEN {
 
 class ArtMethod;
 
+#if defined(__linux__)
+using NativeStackUnwinder = unwindstack::AndroidLocalUnwinder;
+#else
+// Non-Linux stack dump implementations do not use libunwindstack.
+class NativeStackUnwinder {};
+#endif
+
 // Remove method parameters by finding matching top-level parenthesis and removing them.
 // Since functions can be defined inside functions, this can remove multiple substrings.
 std::string StripParameters(std::string name);
@@ -45,7 +52,7 @@ void DumpNativeStack(std::ostream& os,
     NO_THREAD_SAFETY_ANALYSIS;
 
 void DumpNativeStack(std::ostream& os,
-                     unwindstack::AndroidLocalUnwinder& unwinder,
+                     NativeStackUnwinder& unwinder,
                      pid_t tid,
                      const char* prefix = "",
                      ArtMethod* current_method = nullptr,

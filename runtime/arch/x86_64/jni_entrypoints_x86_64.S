@@ -98,7 +98,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     // The hidden arg holding the tagged method (bit 0 set means GenericJNI) is RAX.
     // For Generic JNI we already have a managed frame, so we reuse the art_jni_dlsym_lookup_stub.
     testq LITERAL(1), %rax
-    jnz art_jni_dlsym_lookup_stub
+    jnz SYMBOL(art_jni_dlsym_lookup_stub)
 
     // Save GPR args and method.
     PUSH_ARG r9
@@ -155,7 +155,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
 
     // Calculate the number of QWORDs to move.
     shrq LITERAL(3), %rax
-    jz .Lcritical_skip_copy_args
+    jz ART_LOCAL_LABEL(critical_skip_copy_args)
 
     // Save RDI, RSI, RCX so that we can use them for moving stack args.
     PUSH_ARG rdi
@@ -173,7 +173,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     POP_ARG rsi
     POP_ARG rdi
 
-.Lcritical_skip_copy_args:
+ART_LOCAL_LABEL(critical_skip_copy_args):
     // Calculate the base address of the managed frame.
     leaq (%rsp, %rax, 8), %rax
 
@@ -217,7 +217,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
 
     leaq 1(%rbp), %rax            // Prepare managed SP tagged for a GenericJNI frame.
     testl LITERAL(ACCESS_FLAGS_METHOD_IS_NATIVE), ART_METHOD_ACCESS_FLAGS_OFFSET(%r10)
-    jnz .Lcritical_skip_prepare_runtime_method
+    jnz ART_LOCAL_LABEL(critical_skip_prepare_runtime_method)
 
     // Save the return PC for managed stack walk.
     // (When coming from a compiled stub, the correct return PC is already there.)
@@ -229,7 +229,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
 
     movq %rbp, %rax               // Prepare untagged managed SP for the runtime method.
 
-.Lcritical_skip_prepare_runtime_method:
+ART_LOCAL_LABEL(critical_skip_prepare_runtime_method):
     // Store the method on the bottom of the managed frame.
     movq %r10, (%rbp)
 
@@ -250,7 +250,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     // Check for exception.
     test %rax, %rax
     CFI_REMEMBER_STATE
-    jz .Lcritical_deliver_exception
+    jz ART_LOCAL_LABEL(critical_deliver_exception)
 
     // Restore the native arg register RDI.
     movq %rbx, %rdi
@@ -287,7 +287,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     RESTORE_REG_BASE rbp, rbp, 136
 
     cmp %r10, %rsp
-    je .Lcritical_skip_copy_args_back
+    je ART_LOCAL_LABEL(critical_skip_copy_args_back)
 
     // Save RDI, RSI, RCX so that we can use them for moving stack args.
     PUSH_ARG rdi
@@ -311,7 +311,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     POP_ARG rsi
     POP_ARG rdi
 
-.Lcritical_skip_copy_args_back:
+ART_LOCAL_LABEL(critical_skip_copy_args_back):
     // Remove the frame reservation.
     DECREASE_FRAME FRAME_SIZE_SAVE_REFS_AND_ARGS - __SIZEOF_POINTER__
 
@@ -322,7 +322,7 @@ DEFINE_FUNCTION art_jni_dlsym_lookup_critical_stub
     // Do the tail call.
     jmp *%rax
 
-.Lcritical_deliver_exception:
+ART_LOCAL_LABEL(critical_deliver_exception):
     CFI_RESTORE_STATE_AND_DEF_CFA %rbp, FRAME_SIZE_SAVE_REFS_AND_ARGS
     DELIVER_PENDING_EXCEPTION_FRAME_READY
 END_FUNCTION art_jni_dlsym_lookup_critical_stub
@@ -371,7 +371,7 @@ JNI_SAVE_RETURN_VALUE_TRAMPOLINE \
      *     All argument registers need to be preserved.
      */
 DEFINE_FUNCTION art_jni_lock_object
-    LOCK_OBJECT_FAST_PATH rbx, ebp, art_jni_lock_object_no_inline
+    LOCK_OBJECT_FAST_PATH rbx, ebp, SYMBOL(art_jni_lock_object_no_inline)
 END_FUNCTION art_jni_lock_object
 
     /*
@@ -396,7 +396,7 @@ DEFINE_FUNCTION art_jni_lock_object_no_inline
     // Restore register args RDI, RSI, RDX, RCX, R8, R9, mmx0-mmx7 and return.
     RESTORE_MANAGED_ARGS_DECREASE_FRAME
     ret
-    .cfi_adjust_cfa_offset MANAGED_ARGS_SAVE_SIZE
+    CFI_ADJUST_CFA_OFFSET(MANAGED_ARGS_SAVE_SIZE)
 1:
     // All args are irrelevant when throwing an exception. Remove the spill area except for new
     // padding to align stack.
@@ -420,9 +420,9 @@ END_FUNCTION art_jni_lock_object_no_inline
      */
 DEFINE_FUNCTION art_jni_unlock_object
     movq %rax, %r12                       // Preserve RAX in a different register.
-    UNLOCK_OBJECT_FAST_PATH rbx, ebp, /*saved_rax*/ r12, .Lunlock_object_jni_slow
+    UNLOCK_OBJECT_FAST_PATH rbx, ebp, /*saved_rax*/ r12, ART_LOCAL_LABEL(unlock_object_jni_slow)
 
- .Lunlock_object_jni_slow:
+ ART_LOCAL_LABEL(unlock_object_jni_slow):
     movq %r12, %rax                       // Restore RAX.
     jmp  SYMBOL(art_jni_unlock_object_no_inline)
 END_FUNCTION art_jni_unlock_object

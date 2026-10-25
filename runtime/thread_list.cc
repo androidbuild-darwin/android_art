@@ -51,10 +51,12 @@
 #include "scoped_thread_state_change-inl.h"
 #include "thread.h"
 #include "trace.h"
+#if defined(__linux__)
 #include "unwindstack/AndroidUnwinder.h"
+#endif
 #include "well_known_classes.h"
 
-#if ART_USE_FUTEXES
+#if ART_USE_FUTEXES && !defined(__APPLE__)
 #include <linux/futex.h>
 #include <sys/syscall.h>
 #endif  // ART_USE_FUTEXES
@@ -121,7 +123,7 @@ pid_t ThreadList::GetLockOwner() {
 
 void ThreadList::DumpNativeStacks(std::ostream& os) {
   MutexLock mu(Thread::Current(), *Locks::thread_list_lock_);
-  unwindstack::AndroidLocalUnwinder unwinder;
+  NativeStackUnwinder unwinder;
   for (const auto& thread : list_) {
     os << "DUMPING THREAD " << thread->GetTid() << "\n";
     DumpNativeStack(os, unwinder, thread->GetTid(), "\t");
@@ -193,7 +195,9 @@ class DumpCheckpoint final : public Closure {
         // Avoid verifying count in case a thread doesn't end up passing through the barrier.
         // This avoids a SIGABRT that would otherwise happen in the destructor.
         barrier_(0, /*verify_count_on_shutdown=*/false),
+#if defined(__linux__)
         unwinder_(std::vector<std::string>{}, std::vector<std::string> {"oat", "odex"}),
+#endif
         dump_native_stack_(dump_native_stack) {
   }
 
@@ -241,7 +245,7 @@ class DumpCheckpoint final : public Closure {
   // The barrier to be passed through and for the requestor to wait upon.
   Barrier barrier_;
   // A backtrace map, so that all threads use a shared info and don't reacquire/parse separately.
-  unwindstack::AndroidLocalUnwinder unwinder_;
+  NativeStackUnwinder unwinder_;
   // Whether we should dump the native stack.
   const bool dump_native_stack_;
 };

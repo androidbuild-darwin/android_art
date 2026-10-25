@@ -36,7 +36,9 @@
 #include "android-base/stringprintf.h"
 #include "android-base/strings.h"
 
+#if defined(__linux__)
 #include "unwindstack/AndroidUnwinder.h"
+#endif
 
 #include "arch/context-inl.h"
 #include "arch/context.h"
@@ -120,7 +122,7 @@
 #include <android/set_abort_message.h>
 #endif
 
-#if ART_USE_FUTEXES
+#if ART_USE_FUTEXES && !defined(__APPLE__)
 #include <linux/futex.h>
 #include <sys/syscall.h>
 #endif  // ART_USE_FUTEXES
@@ -128,8 +130,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic error "-Wconversion"
 
+#if !defined(__APPLE__)
 extern "C" __attribute__((weak)) void* __hwasan_tag_pointer(const volatile void* p,
-                                                            unsigned char tag);
+                                                         unsigned char tag);
+#endif
 
 namespace art_flags = com::android::art::flags;
 
@@ -816,8 +820,12 @@ void Thread::InstallImplicitProtection() {
       volatile char space[gPageSize - (kAsanMultiplier * 256)] __attribute__((uninitialized));
       [[maybe_unused]] char sink = space[zero];
       // Remove tag from the pointer. Nop in non-hwasan builds.
+#if defined(__APPLE__)
+      uintptr_t addr = reinterpret_cast<uintptr_t>(space);
+#else
       uintptr_t addr = reinterpret_cast<uintptr_t>(
           __hwasan_tag_pointer != nullptr ? __hwasan_tag_pointer(space, 0) : space);
+#endif
       if (addr >= target + gPageSize) {
         Touch(target);
       }
@@ -1460,7 +1468,7 @@ Thread::DumpOrder Thread::Dump(std::ostream& os,
 }
 
 Thread::DumpOrder Thread::Dump(std::ostream& os,
-                               unwindstack::AndroidLocalUnwinder& unwinder,
+                               NativeStackUnwinder& unwinder,
                                bool dump_native_stack,
                                bool force_dump_stack) const {
   DumpState(os);
@@ -1493,7 +1501,7 @@ uint64_t Thread::GetCpuMicroTime() const {
          static_cast<uint64_t>(now.tv_nsec) / UINT64_C(1000);
 #else  // __APPLE__
   UNIMPLEMENTED(WARNING);
-  return -1;
+  return static_cast<uint64_t>(-1);
 #endif
 }
 
@@ -2386,12 +2394,12 @@ Thread::DumpOrder Thread::DumpJavaStack(std::ostream& os,
 Thread::DumpOrder Thread::DumpStack(std::ostream& os,
                                     bool dump_native_stack,
                                     bool force_dump_stack) const {
-  unwindstack::AndroidLocalUnwinder unwinder;
+  NativeStackUnwinder unwinder;
   return DumpStack(os, unwinder, dump_native_stack, force_dump_stack);
 }
 
 Thread::DumpOrder Thread::DumpStack(std::ostream& os,
-                                    unwindstack::AndroidLocalUnwinder& unwinder,
+                                    NativeStackUnwinder& unwinder,
                                     bool dump_native_stack,
                                     bool force_dump_stack) const {
   // TODO: we call this code when dying but may not have suspended the thread ourself. The

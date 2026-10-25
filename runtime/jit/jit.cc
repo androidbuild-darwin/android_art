@@ -522,6 +522,7 @@ void Jit::AddMemoryUsage(ArtMethod* method, size_t bytes) {
 }
 
 void Jit::NotifyZygoteCompilationDone() {
+#if defined(__linux__)
   if (fd_methods_ == -1) {
     return;
   }
@@ -645,6 +646,9 @@ void Jit::NotifyZygoteCompilationDone() {
   // Mark that compilation of boot classpath is done, and memory can now be
   // shared. Other processes will pick up this information.
   code_cache_->GetZygoteMap()->SetCompilationState(ZygoteCompilationState::kNotifiedOk);
+#else
+  LOG(FATAL) << "Zygote JIT sharing requires Linux";
+#endif
 }
 
 class JitCompileTask final : public Task {
@@ -950,13 +954,16 @@ class JitProfileTask final : public Task {
   DISALLOW_COPY_AND_ASSIGN(JitProfileTask);
 };
 
+#if defined(__linux__)
 static void CopyIfDifferent(void* s1, const void* s2, size_t n) {
   if (memcmp(s1, s2, n) != 0) {
     memcpy(s1, s2, n);
   }
 }
+#endif
 
 void Jit::MapBootImageMethods() {
+#if defined(__linux__)
   if (Runtime::Current()->IsJavaDebuggable()) {
     LOG(INFO) << "Not mapping boot image methods due to process being debuggable";
     return;
@@ -1076,6 +1083,9 @@ void Jit::MapBootImageMethods() {
   }
 
   LOG(INFO) << "Successfully mapped boot image methods";
+#else
+  LOG(FATAL) << "Zygote JIT sharing requires Linux";
+#endif
 }
 
 bool Jit::InZygoteUsingJit() {

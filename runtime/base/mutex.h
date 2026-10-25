@@ -33,7 +33,7 @@
 #include "base/macros.h"
 #include "locks.h"
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 #define ART_USE_FUTEXES 1
 #else
 #define ART_USE_FUTEXES 0

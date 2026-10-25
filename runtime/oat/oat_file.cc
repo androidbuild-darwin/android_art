@@ -85,7 +85,12 @@ static constexpr bool kUseDlopen = true;
 // bionic, so cannot take advantage of the support for changed semantics (loading the same soname
 // multiple times). However, if/when we switch the above, we likely want to switch this, too,
 // to get test coverage of the code paths.
+#ifdef __APPLE__
+// dyld cannot load the ELF files produced for Android.
+static constexpr bool kUseDlopenOnHost = false;
+#else
 static constexpr bool kUseDlopenOnHost = true;
+#endif
 
 // For debugging, Open will print DlOpen error message if set to true.
 static constexpr bool kPrintDlOpenErrorMessage = false;
@@ -1945,24 +1950,26 @@ OatFile* OatFile::Open(int zip_fd,
     return nullptr;
   }
 
-  // Try dlopen first, as it is required for native debuggability. This will fail fast if dlopen is
-  // disabled.
-  OatFile* with_dlopen = OatFileBase::OpenOatFile<DlOpenOatFile>(zip_fd,
-                                                                 vdex_filename,
-                                                                 oat_filename,
-                                                                 oat_location,
-                                                                 /*writable=*/false,
-                                                                 executable,
-                                                                 low_4gb,
-                                                                 dex_filenames,
-                                                                 dex_files,
-                                                                 reservation,
-                                                                 error_msg);
-  if (with_dlopen != nullptr) {
-    return with_dlopen;
-  }
-  if (kPrintDlOpenErrorMessage) {
-    LOG(ERROR) << "Failed to dlopen: " << oat_filename << " with error " << *error_msg;
+  if (kUseDlopen && (kIsTargetBuild || kUseDlopenOnHost)) {
+    // Try dlopen first, as it is required for native debuggability. This will fail fast if dlopen is
+    // disabled.
+    OatFile* with_dlopen = OatFileBase::OpenOatFile<DlOpenOatFile>(zip_fd,
+                                                                   vdex_filename,
+                                                                   oat_filename,
+                                                                   oat_location,
+                                                                   /*writable=*/false,
+                                                                   executable,
+                                                                   low_4gb,
+                                                                   dex_filenames,
+                                                                   dex_files,
+                                                                   reservation,
+                                                                   error_msg);
+    if (with_dlopen != nullptr) {
+      return with_dlopen;
+    }
+    if (kPrintDlOpenErrorMessage) {
+      LOG(ERROR) << "Failed to dlopen: " << oat_filename << " with error " << *error_msg;
+    }
   }
   // If we aren't trying to execute, we just use our own ElfFile loader for a couple reasons:
   //

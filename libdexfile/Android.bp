@@ -180,6 +180,7 @@ art_cc_library {
         "//system/unwinding/libunwindstack",
     ],
     defaults: [
+        "art_darwin_aot_defaults",
         "libdexfile_defaults",
         "libart_nativeunwind_defaults",
     ],
@@ -337,7 +338,10 @@ art_cc_test {
 
 cc_library_headers {
     name: "libdexfile_external_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     visibility: ["//visibility:public"],
     host_supported: true,
     export_include_dirs: ["external/include"],
@@ -363,7 +367,10 @@ cc_library_headers {
 // Make dex_instruction_list.h available for tools/jvmti-agents/titrace
 cc_library_headers {
     name: "libdexfile_all_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     visibility: ["//art:__subpackages__"],
     host_supported: true,
     export_include_dirs: ["."],
@@ -498,7 +505,10 @@ art_cc_test {
 
 cc_library_static {
     name: "libdexfile_support_static",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
     srcs: [
         "external/dex_file_supp.cc",

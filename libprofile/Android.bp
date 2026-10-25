@@ -106,6 +106,7 @@ cc_defaults {
 art_cc_library {
     name: "libprofile",
     defaults: [
+        "art_darwin_aot_defaults",
         "libprofile_defaults",
         "libart_nativeunwind_defaults",
     ],

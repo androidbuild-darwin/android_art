@@ -59,7 +59,7 @@ struct DumpStackLastTimeTLSData : public art::TLSData {
   std::atomic<uint64_t> last_dump_time_ms_;
 };
 
-#if ART_USE_FUTEXES
+#if ART_USE_FUTEXES && HAVE_TIMED_RWLOCK
 // Compute a relative timespec as *result_ts = lhs - rhs.
 // Return false (and produce an invalid *result_ts) if lhs < rhs.
 static bool ComputeRelativeTimeSpec(timespec* result_ts, const timespec& lhs, const timespec& rhs) {
@@ -1075,12 +1075,16 @@ void ConditionVariable::RequeueWaiters(int32_t count) {
     sequence_++;  // Indicate a signal occurred.
     // Move waiters from the condition variable's futex to the guard's futex,
     // so that they will be woken up when the mutex is released.
+#if defined(__APPLE__)
+    bool done = futex(sequence_.Address(), FUTEX_WAKE_PRIVATE, count, nullptr, nullptr, 0) != -1;
+#else
     bool done = futex(sequence_.Address(),
                       FUTEX_REQUEUE_PRIVATE,
                       /* Threads to wake */ 0,
                       /* Threads to requeue*/ reinterpret_cast<const timespec*>(count),
                       guard_.state_and_contenders_.Address(),
                       0) != -1;
+#endif
     if (!done && errno != EAGAIN && errno != EINTR) {
       PLOG(FATAL) << "futex requeue failed for " << name_;
     }

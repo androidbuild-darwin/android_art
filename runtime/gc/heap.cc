@@ -443,10 +443,12 @@ Heap::Heap(size_t initial_size,
     // This ensures that userfaultfd syscall is done before any seccomp filter is installed.
     // TODO(b/266731037): Remove this when we no longer need to collect metric on userfaultfd
     // support.
+#if defined(__linux__)
     auto [uffd_supported, minor_fault_supported] = collector::MarkCompact::GetUffdAndMinorFault();
     // The check is just to ensure that compiler doesn't eliminate the function call above.
     // Userfaultfd support is certain to be there if its minor-fault feature is supported.
     CHECK_IMPLIES(minor_fault_supported, uffd_supported);
+#endif
   }
 
   if (gUseReadBarrier) {
@@ -795,10 +797,12 @@ Heap::Heap(size_t initial_size,
       semi_space_collector_ = new collector::SemiSpace(this);
       garbage_collectors_.push_back(semi_space_collector_);
     }
+#if defined(__linux__)
     if (MayUseCollector(kCollectorTypeCMC)) {
       mark_compact_ = new collector::MarkCompact(this);
       garbage_collectors_.push_back(mark_compact_);
     }
+#endif
     if (MayUseCollector(kCollectorTypeCC)) {
       concurrent_copying_collector_ = new collector::ConcurrentCopying(this,
                                                                        /*young_gen=*/false,
@@ -3908,12 +3912,15 @@ void Heap::ClampGrowthLimit() {
     DCHECK(region_space_ != nullptr);
     // Twice the capacity as CC needs extra space for evacuating objects.
     region_space_->ClampGrowthLimit(2 * capacity_);
-  } else if (collector_type_ == kCollectorTypeCMC) {
+  }
+#if defined(__linux__)
+  else if (collector_type_ == kCollectorTypeCMC) {
     DCHECK(gUseUserfaultfd);
     DCHECK_NE(mark_compact_, nullptr);
     DCHECK_NE(bump_pointer_space_, nullptr);
     mark_compact_->ClampGrowthLimit(capacity_);
   }
+#endif
   // This space isn't added for performance reasons.
   if (main_space_backup_.get() != nullptr) {
     main_space_backup_->ClampGrowthLimit();

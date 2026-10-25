@@ -49,7 +49,10 @@ cc_defaults {
 
 cc_library_headers {
     name: "libart_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
 
     export_include_dirs: ["."],
@@ -88,7 +91,10 @@ cc_library_headers {
 // Generated headers target required by libart.
 cc_library_headers {
     name: "libart_generated_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
 
     // asm_support_gen.h (used by asm_support.h) is generated with cpp-define-generator
@@ -560,6 +566,13 @@ cc_defaults {
     },
 
     target: {
+        darwin: {
+            exclude_srcs: ["gc/collector/mark_compact.cc"],
+        },
+        darwin_x86_64: {
+            exclude_srcs: [":libart_mterp.x86_64ng"],
+            srcs: ["interpreter/mterp/nterp_darwin_x86_64.S"],
+        },
         android: {
             srcs: [
                 "monitor_android.cc",
@@ -809,7 +822,10 @@ gensrcs {
 // Release version of the ART runtime library.
 art_cc_library_static {
     name: "libart-runtime",
-    defaults: ["libart-runtime_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "libart-runtime_defaults",
+    ],
     apex_available: [
         "com.android.art",
         "com.android.art.debug",
@@ -849,7 +865,7 @@ art_cc_library_static {
 // Release version of the ART runtime library, bundled with `libart-compiler` for JIT support.
 art_cc_library {
     name: "libart",
-    defaults: ["libart_defaults"],
+    defaults: ["libart_defaults", "art_darwin_aot_defaults"],
     whole_static_libs: [
         "libart-compiler",
         "libart-runtime",

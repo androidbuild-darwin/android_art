@@ -18,6 +18,7 @@
 
 #include "asm_support_x86_64.h"
 #include "base/macros.h"
+#include "runtime.h"
 #include "thread-current-inl.h"
 #include "thread_list.h"
 
@@ -40,6 +41,11 @@ static void arch_prctl(int code, void* val) {
 #endif
 
 void Thread::InitCpu() {
+#if defined(__APPLE__)
+  // Darwin owns GS. The AOT compiler does not execute host quick code and uses Thread::Current().
+  CHECK(Runtime::Current()->IsAotCompiler());
+  tlsPtr_.self = this;
+#else
   MutexLock mu(nullptr, *Locks::modify_ldt_lock_);
 
 #if defined(__linux__)
@@ -65,9 +71,13 @@ void Thread::InitCpu() {
       : "r"(THREAD_SELF_OFFSET)  // input
       :);  // clobber
   CHECK_EQ(self_check, this);
+#endif
 }
 
 void Thread::CleanupCpu() {
+#if defined(__APPLE__)
+  CHECK(Runtime::Current()->IsAotCompiler());
+#else
   // Check that the reads from %gs point to this Thread*.
   Thread* self_check;
   __asm__ __volatile__("movq %%gs:(%1), %0"
@@ -77,6 +87,7 @@ void Thread::CleanupCpu() {
   CHECK_EQ(self_check, this);
 
   // Do nothing.
+#endif
 }
 
 }  // namespace art

@@ -174,7 +174,10 @@ art_cc_binary {
 
 cc_library_static {
     name: "libodrstatslog",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
     export_include_dirs: ["include"],
     local_include_dirs: ["include"],

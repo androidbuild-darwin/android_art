@@ -35,6 +35,9 @@ namespace art HIDDEN {
 namespace interpreter {
 
 bool IsNterpSupported() {
+#if defined(__APPLE__)
+  return false;
+#else
   switch (kRuntimeQuickCodeISA) {
     case InstructionSet::kArm:
     case InstructionSet::kThumb2:
@@ -48,6 +51,7 @@ bool IsNterpSupported() {
     default:
       return false;
   }
+#endif
 }
 
 bool CanRuntimeUseNterp() REQUIRES_SHARED(Locks::mutator_lock_) {
@@ -100,6 +104,9 @@ ArrayRef<const uint8_t> NterpWithClinitImpl() {
  * Verify some constants used by the nterp interpreter.
  */
 void CheckNterpAsmConstants() {
+#if defined(__APPLE__)
+  CHECK(!IsNterpSupported());
+#else
   /*
    * If we're using computed goto instruction transitions, make sure
    * none of the handlers overflows the byte limit.  This won't tell
@@ -114,6 +121,7 @@ void CheckNterpAsmConstants() {
     LOG(FATAL) << "ERROR: unexpected asm interp size " << interp_size
                << "(did an instruction handler exceed " << width << " bytes?)";
   }
+#endif
 }
 
 inline void UpdateHotness(ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_) {

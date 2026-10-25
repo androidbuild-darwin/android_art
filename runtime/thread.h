@@ -42,6 +42,7 @@
 #include "javaheapprof/javaheapsampler.h"
 #include "jvalue.h"
 #include "managed_stack.h"
+#include "native_stack_dump.h"
 #include "offsets.h"
 #include "read_barrier_config.h"
 #include "reflective_handle_scope.h"
@@ -50,9 +51,6 @@
 #include "suspend_reason.h"
 #include "thread_state.h"
 
-namespace unwindstack {
-class AndroidLocalUnwinder;
-}  // namespace unwindstack
 
 namespace art HIDDEN {
 
@@ -371,7 +369,7 @@ class EXPORT Thread {
                  bool force_dump_stack = false) const
       REQUIRES_SHARED(Locks::mutator_lock_);
   DumpOrder Dump(std::ostream& os,
-                 unwindstack::AndroidLocalUnwinder& unwinder,
+                 NativeStackUnwinder& unwinder,
                  bool dump_native_stack = true,
                  bool force_dump_stack = false) const
       REQUIRES_SHARED(Locks::mutator_lock_);
@@ -1780,7 +1778,7 @@ class EXPORT Thread {
                       bool force_dump_stack = false) const
       REQUIRES_SHARED(Locks::mutator_lock_);
   DumpOrder DumpStack(std::ostream& os,
-                      unwindstack::AndroidLocalUnwinder& unwinder,
+                      NativeStackUnwinder& unwinder,
                       bool dump_native_stack = true,
                       bool force_dump_stack = false) const
       REQUIRES_SHARED(Locks::mutator_lock_);

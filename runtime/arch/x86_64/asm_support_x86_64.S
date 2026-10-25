@@ -127,6 +127,7 @@
 #define CFI_REG(reg) CFI_REG_##reg
 
 MACRO3(CFI_EXPRESSION_BREG, n, b, offset)
+#if !defined(__APPLE__)
     .if (-0x40 <= (\offset)) && ((\offset) < 0x40)
         CFI_EXPRESSION_BREG_1(\n, \b, \offset)
     .elseif (-0x2000 <= (\offset)) && ((\offset) < 0x2000)
@@ -134,9 +135,11 @@ MACRO3(CFI_EXPRESSION_BREG, n, b, offset)
     .else
         .error "Unsupported offset"
     .endif
+#endif
 END_MACRO
 
 MACRO3(CFI_DEF_CFA_BREG_PLUS_UCONST, reg, offset, size)
+#if !defined(__APPLE__)
     .if ((\size) < 0)
         .error "Size should be positive"
     .endif
@@ -150,14 +153,17 @@ MACRO3(CFI_DEF_CFA_BREG_PLUS_UCONST, reg, offset, size)
     .else
         .error "Unsupported size"
     .endif
+#endif
 END_MACRO
 
     // Symbols.
 #if !defined(__APPLE__)
     #define SYMBOL(name) name
+    #define ART_LOCAL_LABEL(name) .L ## name
     #define PLT_SYMBOL(name) name ## @PLT
 #else
     #define SYMBOL(name) _ ## name
+    #define ART_LOCAL_LABEL(name) L ## name
     #define PLT_SYMBOL(name) _ ## name
 #endif
 
@@ -261,7 +267,7 @@ MACRO0(UNTESTED)
 END_MACRO
 
 MACRO1(LOAD_RUNTIME_INSTANCE, reg)
-    movq _ZN3art7Runtime9instance_E@GOTPCREL(%rip), REG_VAR(reg)
+    movq SYMBOL(_ZN3art7Runtime9instance_E)@GOTPCREL(%rip), REG_VAR(reg)
     movq (REG_VAR(reg)), REG_VAR(reg)
 END_MACRO
 
@@ -506,11 +512,11 @@ MACRO3(LOCK_OBJECT_FAST_PATH, obj, tmp, slow_lock)
                                           // Check lock word state and thread id together,
     testl LITERAL(LOCK_WORD_STATE_MASK_SHIFTED | LOCK_WORD_THIN_LOCK_OWNER_MASK_SHIFTED), \
           REG_VAR(tmp)
-    jne  \slow_lock                       // Slow path if either of the two high bits are set.
+    jne  RAW_VAR(slow_lock)                       // Slow path if either of the two high bits are set.
                                           // Increment the recursive lock count.
     leal LOCK_WORD_THIN_LOCK_COUNT_ONE(%eax), REG_VAR(tmp)
     testl LITERAL(LOCK_WORD_THIN_LOCK_COUNT_MASK_SHIFTED), REG_VAR(tmp)
-    je   \slow_lock                       // If count overflowed, go to slow lock.
+    je   RAW_VAR(slow_lock)                       // If count overflowed, go to slow lock.
     // Update lockword for recursive lock, cmpxchg necessary for read barrier bits.
                                           // EAX: old val, tmp: new val.
     lock cmpxchg REG_VAR(tmp), MIRROR_OBJECT_LOCK_WORD_OFFSET(REG_VAR(obj))
@@ -541,7 +547,7 @@ MACRO4(UNLOCK_OBJECT_FAST_PATH, obj, tmp, saved_rax, slow_unlock)
                                           // Check lock word state and thread id together.
     testl LITERAL(LOCK_WORD_STATE_MASK_SHIFTED | LOCK_WORD_THIN_LOCK_OWNER_MASK_SHIFTED), \
           REG_VAR(tmp)
-    jnz  \slow_unlock
+    jnz  RAW_VAR(slow_unlock)
     // Update lockword for recursive unlock, cmpxchg necessary for read barrier bits.
                                           // tmp: new lock word with decremented count.
     leal -LOCK_WORD_THIN_LOCK_COUNT_ONE(%eax), REG_VAR(tmp)

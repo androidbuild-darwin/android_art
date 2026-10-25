@@ -310,6 +310,7 @@ gensrcs {
 art_cc_library_static {
     name: "libart-compiler",
     defaults: [
+        "art_darwin_aot_defaults",
         "libart-compiler-defaults",
         "libart-compiler_deps",
     ],
@@ -391,7 +392,10 @@ cc_defaults {
 // Export headers required by `libart-runtime` to use JIT from `libart-compiler`.
 cc_library_headers {
     name: "libart-compiler_jit_headers",
-    defaults: ["art_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "art_defaults",
+    ],
     host_supported: true,
     export_include_dirs: ["export"],
     apex_available: [

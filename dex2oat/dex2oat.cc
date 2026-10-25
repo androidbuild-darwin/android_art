@@ -253,7 +253,7 @@ NO_RETURN static void Usage(const char* fmt, ...) {
 
 
 // Set CPU affinity from a string containing a comma-separated list of numeric CPU identifiers.
-static void SetCpuAffinity(const std::vector<int32_t>& cpu_list) {
+static void SetCpuAffinity([[maybe_unused]] const std::vector<int32_t>& cpu_list) {
 #ifdef __linux__
   int cpu_count = sysconf(_SC_NPROCESSORS_CONF);
   cpu_set_t target_cpu_set;
@@ -311,6 +311,8 @@ class WatchDog {
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_setclock, (&condattr, CLOCK_MONOTONIC), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_cond_init, (&cond_, &condattr), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_destroy, (&condattr), reason);
+#else
+    CHECK_WATCH_DOG_PTHREAD_CALL(pthread_cond_init, (&cond_, nullptr), reason);
 #endif
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_attr_init, (&attr_), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_create, (&pthread_, &attr_, &CallBack, this), reason);

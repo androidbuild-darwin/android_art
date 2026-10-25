@@ -48,7 +48,10 @@ cc_library_headers {
 // implements a fake platform implementation.
 art_cc_library {
     name: "libartpalette",
-    defaults: ["libartpalette_defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "libartpalette_defaults",
+    ],
     host_supported: true,
     visibility: [
         // TODO(b/183483755): Please visibility checks when the prebuilt

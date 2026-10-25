@@ -59,7 +59,10 @@ art_cc_defaults {
 
 art_cc_library {
     name: "libart-disassembler",
-    defaults: ["libart-disassembler-defaults"],
+    defaults: [
+        "art_darwin_aot_defaults",
+        "libart-disassembler-defaults",
+    ],
     codegen: {
         arm: {
             static_libs: [
@@ -124,7 +127,7 @@ cc_defaults {
 
 cc_library_headers {
     name: "art_disassembler_headers",
-    defaults: ["art_defaults"],
+    defaults: ["art_defaults", "art_darwin_aot_defaults"],
     host_supported: true,
     export_include_dirs: [
         ".",
